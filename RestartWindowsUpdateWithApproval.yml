@@ -13,7 +13,7 @@ parameters:
       type: StringList
       description: (Required) IAM user or user arn of approvers for the automation action
       default: 
-        - "Nana"
+        - "pvirk"
   SNSTopicArn:
       type: String
       description: (Required) The SNS topic ARN used to send pending approval notification for start instance action. The SNS topic name must start with Automation.
@@ -39,7 +39,7 @@ mainSteps:
   - name: RestartWindowsUpdate
     action: aws:runCommand
     inputs:
-      DocumentName: Nana-RestartWindowsUpdate
+      DocumentName: RestartWindowsUpdate
       InstanceIds: "{{InstanceIds}}"
 
   # send an email if cloud trail logging is not enabled
