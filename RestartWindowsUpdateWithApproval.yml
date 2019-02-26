@@ -13,7 +13,7 @@ parameters:
       type: StringList
       description: (Required) IAM user or user arn of approvers for the automation action
       default: 
-        - "pvirk"
+        - "account_id_of_approver"
   SNSTopicArn:
       type: String
       description: (Required) The SNS topic ARN used to send pending approval notification for start instance action. The SNS topic name must start with Automation.
@@ -21,7 +21,7 @@ parameters:
   Email:
     type: String
     description: (Required) Email to notify of restarts
-    default: "mrvirk@amazon.com"
+    default: "youremail@domain.com"
   AutomationAssumeRole:
     type: String
     description: (Optional) The ARN of the role that allows Automation to perform the actions on your behalf.
