@@ -58,6 +58,23 @@ Resources:
       InstanceProfileName: !Ref InstanceProfileRoleName
     DependsOn: InstanceProfileRole
   
+  SSMParameterStorePolicy:
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - ssm:GetParameters
+          - ssm:GetParameter
+          - ssm:DescribeParameters
+          Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/prod/*'
+      PolicyName: SSMParameterStoreDBPolicy
+      Roles:
+        - !Ref InstanceProfileRole
+    DependsOn: InstanceProfileRole
+  
   Instance1:
     Type: AWS::EC2::Instance
     Properties:
@@ -372,11 +389,7 @@ Resources:
           inputs:
             runCommand:
             -  | 
-              $DBString = (Get-SSMParameter -Name DBString).Value
-
-              $DBPassword = Convertto-SecureString (Get-SSMParameter -Name DBPassword -WithDecryption $true).Value -AsPlainText -Force
-
-              $DBCredential = New-Object PSCredential $DBString, $DBPassword
+              $DBString = (Get-SSMParameter -Name /prod/DBString).Value
 
               $DBString
   
