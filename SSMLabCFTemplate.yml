@@ -1,0 +1,465 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: Deploys 5 Windows  and 3 Linux instances with the same configuration, from the specified AMI as managed instances
+Parameters:
+  InstanceType:
+    Description: Amazon EC2 Instance Type
+    Type: String
+    Default: t2.medium
+    AllowedValues: [
+      t2.micro,
+      t2.medium, 
+      t2.large
+    ]
+  WindowsAmiId:
+    Description: Ami Id for Windows
+    Type: String
+    Default: ami-0410d3d3bd6d555f4
+  LinuxAmiId:
+    Description: Ami Id for Linux
+    Type: String
+    Default: ami-0080e4c5bc078760e
+  InstanceProfileRoleName:
+    Description: EC2 Instance profile role name to attach
+    Type: String
+  LambdaRoleName:
+    Description: Name of the lambda execution role to create
+    Type: String
+  FunctionName:
+    Description: Name of the lambda function to create
+    Type: String
+    Default: SendEmail
+  YourEmailAddress:
+    Description: Email Address to send notification
+    Type: String
+Resources:
+
+  InstanceProfileRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: [ec2.amazonaws.com]
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      Path: "/"
+      RoleName: !Ref InstanceProfileRoleName 
+    Type: AWS::IAM::Role
+  
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties: 
+      Roles:
+        - !Ref InstanceProfileRole
+      InstanceProfileName: !Ref InstanceProfileRoleName
+    DependsOn: InstanceProfileRole
+  
+  Instance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref WindowsAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      Tags:
+      - Key: Name
+        Value: WindowsServer
+      - Key: ServerType
+        Value: IISServer
+      - Key: Environment
+        Value: Production
+      - Key: Patch Group
+        Value: Windows
+    DependsOn: InstanceProfile
+    
+  Instance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref WindowsAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      Tags:
+      - Key: Name
+        Value: WindowsServer
+      - Key: ServerType
+        Value: IISServer
+      - Key: Environment
+        Value: Production
+      - Key: Patch Group
+        Value: Windows
+    DependsOn: InstanceProfile
+    
+  Instance3:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref WindowsAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      Tags:
+      - Key: Name
+        Value: WindowsServer
+      - Key: ServerType
+        Value: IISServer
+      - Key: Environment
+        Value: Production
+      - Key: Patch Group
+        Value: Windows
+    DependsOn: InstanceProfile
+    
+  Instance4:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref WindowsAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      Tags:
+      - Key: Name
+        Value: WindowsServer
+      - Key: ServerType
+        Value: IISServer
+      - Key: Environment
+        Value: Production
+      - Key: Patch Group
+        Value: Windows
+    DependsOn: InstanceProfile
+    
+  Instance5:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref WindowsAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      Tags:
+      - Key: Name
+        Value: WindowsServer
+      - Key: ServerType
+        Value: IISServer
+      - Key: Environment
+        Value: Production
+      - Key: Patch Group
+        Value: Windows
+    DependsOn: InstanceProfile
+     
+  Instance6:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LinuxAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |-
+            #!/bin/bash -ex
+            sudo pip install ansible
+      Tags:
+      - Key: Name
+        Value: LinuxServer
+      - Key: Environment
+        Value: Production
+      - Key: ServerType
+        Value: ApacheServer
+      - Key: Patch Group
+        Value: Linux
+    DependsOn: InstanceProfile
+     
+  Instance7:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LinuxAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |-
+            #!/bin/bash -ex
+            sudo pip install ansible
+      Tags:
+      - Key: Name
+        Value: LinuxServer
+      - Key: Environment
+        Value: Production
+      - Key: ServerType
+        Value: ApacheServer
+      - Key: Patch Group
+        Value: Linux
+    DependsOn: InstanceProfile
+    
+  Instance8:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LinuxAmiId
+      IamInstanceProfile: !Ref InstanceProfileRoleName
+      UserData:
+        Fn::Base64:
+          Fn::Sub: |-
+            #!/bin/bash -ex
+            sudo pip install ansible
+      Tags:
+      - Key: Name
+        Value: LinuxServer
+      - Key: Environment
+        Value: Production
+      - Key: ServerType
+        Value: ApacheServer
+      - Key: Patch Group
+        Value: Linux
+    DependsOn: InstanceProfile
+    
+  SSMApprovalSNSTopic: 
+    Type: "AWS::SNS::Topic"
+    Properties:
+      TopicName: "SSMAlerts"
+      DisplayName: "SSM Execution Alerts" 
+      Subscription: 
+      - Endpoint: !Ref YourEmailAddress
+        Protocol: email
+  LambdaRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: [lambda.amazonaws.com]
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
+      Path: "/"
+      RoleName: !Ref LambdaRoleName 
+    Type: AWS::IAM::Role
+  
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        ZipFile: "\"Lambda handler for sending email\"\r\nimport boto3\r\n        \r\ndef lambda_handler(event, context):\r\n    \"Sends email message from lambda using SES\"\r\n    if not (('name' in event) and ('to' in event) and ('message' in event)):\r\n        return {\"code\": 1, \"message\": \"Must preovide all values\"}\r\n\r\n    if event['name'] != \"\" and event['to'] != \"\":\r\n        name = event['name']\r\n        toEmail = event['to']\r\n        subject = event['subject']\r\n        message = event['message']\r\n\r\n        fromEmail = event['to']\r\n        replyTo = fromEmail\r\n        \r\n        subject = \"[\" + name + \"]\" + \":\" + subject \r\n        \r\n        client = boto3.client('ses', region_name='us-east-1')\r\n        response = client.send_email(\r\n\t\t\tSource=fromEmail,\r\n\t\t\tDestination={\r\n\t\t\t\t'ToAddresses': [\r\n\t\t\t\t\ttoEmail,\r\n\t\t\t\t],\r\n\t\t\t},\r\n\t\t\tMessage={\r\n\t\t\t\t'Subject': {\r\n\t\t\t\t\t'Data': subject,\r\n\t\t\t\t\t'Charset': 'utf8'\r\n\t\t\t\t},\r\n\t\t\t\t'Body': {\r\n\t\t\t\t\t'Text': {\r\n\t\t\t\t\t\t'Data': message,\r\n\t\t\t\t\t\t'Charset': 'utf8'\r\n\t\t\t\t\t}\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t)\r\n\t\t\t\r\n        print (response['MessageId'])\r\n        return {'code': 0, 'message': 'success'}"
+      Role: !Join ["", ["arn:aws:iam::", !Ref "AWS::AccountId", ":role/", !Ref LambdaRoleName ]]
+      Timeout: 60
+      Handler: index.lambda_handler
+      Runtime: python3.6
+      MemorySize: 128
+      FunctionName: !Ref FunctionName
+    DependsOn: LambdaRole
+  
+  PSConfLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties: 
+      LogGroupName: PSConfLogGroup
+      RetentionInDays: 90
+  
+  RestartWindowsUpdateWithApproval: 
+    Type: "AWS::SSM::Document"
+    DependsOn: [RestartWindowsUpdate, SSMApprovalSNSTopic]
+    Properties: 
+      DocumentType: 'Automation'
+      Content: 
+        description: Restarts Windows Update with Approval
+        schemaVersion: "0.3"
+        assumeRole: "{{ AutomationAssumeRole }}"
+        parameters:
+          InstanceIds: 
+              type: StringList
+              description: (Required) Instance(s) to target for restarting Windows update service 
+          Approvers: 
+              type: StringList
+              description: (Required) IAM user or user arn of approvers for the automation action
+              default: 
+                - "pvirk"
+          SNSTopicArn:
+              type: String
+              description: (Required) The SNS topic ARN used to send pending approval notification for start instance action. The SNS topic name must start with Automation.
+              default: !Ref SSMApprovalSNSTopic
+          Email:
+            type: String
+            description: (Required) Email to notify of restarts
+            default: !Ref YourEmailAddress
+          AutomationAssumeRole:
+            type: String
+            description: (Optional) The ARN of the role that allows Automation to perform the actions on your behalf.
+            default: ""
+        mainSteps:
+          # request approval
+          - name: RequestApproval
+            action: aws:approve
+            inputs:
+              NotificationArn: "{{SNSTopicArn}}"
+              Message: "Approval requested to restart Windows update service"
+              Approvers: "{{Approvers}}"
+              MinRequiredApprovals: 1
+          # Run the command document to restart Windows update
+          - name: RestartWindowsUpdate
+            action: aws:runCommand
+            inputs:
+              DocumentName: !Ref RestartWindowsUpdate
+              InstanceIds: "{{InstanceIds}}"
+
+          # send an email if cloud trail logging is not enabled
+          - name: SendEmail
+            action: aws:invokeLambdaFunction
+            inputs:
+              FunctionName: SendEmail 
+              Payload: |-
+                  {
+                    "name": "Info",
+                    "to": "{{Email}}",
+                    "subject": "Windows Update Service Restarted",
+                    "message": "Windows update service was restarted in one or more instances. Refer command id : https://{{global:REGION}}.console.aws.amazon.com/systems-manager/run-command/{{RestartWindowsUpdate.CommandId}}?region={{global:REGION}}"
+                  }
+            isEnd: true
+  
+  RestartWindowsUpdate: 
+    Type: "AWS::SSM::Document"
+    Properties: 
+      DocumentType: 'Command'
+      Content: 
+        schemaVersion: "2.2"
+        description: "Run PowerShell Command: Restart-Service wuauserv"
+        mainSteps:
+        - action: "aws:runPowerShellScript"
+          name: "example"
+          inputs:
+            runCommand:
+            -  | 
+              Restart-Service wuauserv -Verbose
+  
+  OutputConsoleMessage: 
+    Type: "AWS::SSM::Document"
+    Properties: 
+      DocumentType: 'Command'
+      Content: 
+        schemaVersion: '2.2'
+        description: Command Document Example JSON Template
+        parameters:
+          Message:
+            type: String
+            description: Output Message to console
+            default: Hello World
+        mainSteps:
+        - name: RunWindowsPoweShellCommand
+          action: aws:runPowerShellScript
+          precondition:
+            StringEquals:
+            - platformType
+            - Windows
+          inputs:
+            runCommand:
+            - Write-Output {{Message}}
+        - name: RunShellCommandLinux
+          action: aws:runShellScript
+          precondition:
+            StringEquals:
+            - platformType
+            - Linux
+          inputs:
+            runCommand:
+            - echo {{Message}}
+  
+  GetCredentialFromStore: 
+    Type: "AWS::SSM::Document"
+    Properties: 
+      DocumentType: 'Command'
+      Content: 
+        schemaVersion: "2.2"
+        description: "Run PowerShell Command: Get DB Credentials from Parameter Store"
+        mainSteps:
+        - action: "aws:runPowerShellScript"
+          name: "example"
+          inputs:
+            runCommand:
+            -  | 
+              $DBString = (Get-SSMParameter -Name DBString).Value
+
+              $DBPassword = Convertto-SecureString (Get-SSMParameter -Name DBPassword -WithDecryption $true).Value -AsPlainText -Force
+
+              $DBCredential = New-Object PSCredential $DBString, $DBPassword
+
+              $DBString
+  
+  DscComplianceInventory: 
+    Type: "AWS::SSM::Document"
+    Properties: 
+      DocumentType: 'Command'
+      Content: 
+        schemaVersion: "2.2"
+        description: "Collect DSC Compliance information"
+        mainSteps:
+        - action: "aws:runPowerShellScript"
+          name: "example"
+          inputs:
+            runCommand:
+            -  | 
+                  Import-Module AWSPowerShell
+                  $d = New-Object 'system.collections.generic.dictionary[string,string]'
+                  $s = Get-DscConfigurationStatus
+                  $d["HostName"] = $s.HostName
+                  $d["Status"] = $s.Status
+                  $d["StartDate"] = $s.StartDate
+                  $d["Type"] = $s.Type
+                  $d["Mode"] = $s.Mode
+                  $d["RebootRequested"] = $s.RebootRequested
+                  $d["NumberOfResources"] = $s.NumberOfResources
+                  $e= New-Object "System.Collections.Generic.List[System.Collections.Generic.Dictionary[System.String, System.String]]"
+                  $e.Add($d)
+                  $item = New-Object Amazon.SimpleSystemsManagement.Model.InventoryItem
+                  $item.SchemaVersion='1.0'
+                  $Item.TypeName = 'Custom:DscCompliance'
+                  $item.Content = $e
+                  $date = Get-Date -Format "s"
+                  $date += "Z"
+                  $item.CaptureTime = $date
+                  $id = Get-EC2InstanceMetadata -Category InstanceId
+                  Write-SSMInventory -InstanceId $id -Item $item
+  
+  ConfigureWindowsServices: 
+    Type: "AWS::SSM::Document"
+    Properties: 
+      DocumentType: 'Command'
+      Content: 
+        schemaVersion: "2.2"
+        description: "Run PowerShell Command: Configuring services using PowerShell DSC"
+        mainSteps:
+        - action: "aws:runPowerShellScript"
+          name: "example"
+          inputs:
+            runCommand:
+            -  | 
+                  Configuration MyServices
+                  {    
+                    # Import the module that defines custom resources
+                    Import-DscResource -Module PSDesiredStateConfiguration
+
+                    # Ensure remote desktop and error reporting are not running
+                    foreach($Service in @('TermService', 'Wersvc'))
+                    {
+                        Service "$Service"
+                        {
+                            Name        = $Service
+                            State       = 'Stopped'
+                            StartupType = 'Manual'
+                        }
+                    }
+
+                    # Install the IIS role
+                    WindowsFeature IIS
+                    {
+                        Ensure          = 'Present'
+                        Name            = 'Web-Server'
+                    }
+
+                    # Ensure w3svc is running
+                    Service 01c5972590c308273
+                    {
+                        Name        = 'w3svc'
+                        State       = 'Running'
+                        StartupType = 'Automatic'
+                        DependsOn   = '[WindowsFeature]IIS'
+                    }
+                  }
+                  MyServices -OutputPath C:\Temp\MyServices
+                  
+                  Start-DscConfiguration -Path C:\Temp\MyServices -ComputerName localhost -Wait -Verbose -Force

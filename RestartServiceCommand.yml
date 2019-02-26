@@ -1,0 +1,19 @@
+#
+#
+#
+---
+schemaVersion: "2.2"
+description: "Run PowerShell Command: Restart a specified service"
+
+parameters:
+  ServiceName:
+    type: "String"
+    description: "Name of service to restart"
+
+mainSteps:
+- action: "aws:runPowerShellScript"
+  name: "example"
+  inputs:
+    runCommand:
+    -  "Restart-Service {{ServiceName}} -Verbose"
+...

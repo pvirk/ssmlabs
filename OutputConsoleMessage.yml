@@ -1,0 +1,27 @@
+---
+schemaVersion: '2.2'
+description: Command Document Example JSON Template
+parameters:
+  Message:
+    type: String
+    description: Output Message to console
+    default: Hello World
+mainSteps:
+- name: RunWindowsPoweShellCommand
+  action: aws:runPowerShellScript
+  precondition:
+    StringEquals:
+    - platformType
+    - Windows
+  inputs:
+    runCommand:
+    - Write-Output {{Message}}
+- name: RunShellCommandLinux
+  action: aws:runShellScript
+  precondition:
+    StringEquals:
+    - platformType
+    - Linux
+  inputs:
+    runCommand:
+    - echo {{Message}}
